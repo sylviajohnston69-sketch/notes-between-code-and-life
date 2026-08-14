@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { SITE } from '../config/site';
+import { getPublishedPosts } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+---
+
+<BaseLayout>
+  <div class="shell">
+    <blockquote>{SITE.quote}</blockquote>
+    <div class="home-grid">
+      <section aria-label="最新文章">
+        {posts.map((post) => <PostCard post={post} />)}
+      </section>
+      <Sidebar posts={posts} />
+    </div>
+  </div>
+</BaseLayout>
