@@ -18,7 +18,7 @@ export function groupByYear<T extends Dated>(items: T[]): Map<number, T[]> {
   const groups = new Map<number, T[]>();
 
   for (const item of sortNewestFirst(items)) {
-    const year = item.date.getFullYear();
+    const year = item.date.getUTCFullYear();
     groups.set(year, [...(groups.get(year) ?? []), item]);
   }
 

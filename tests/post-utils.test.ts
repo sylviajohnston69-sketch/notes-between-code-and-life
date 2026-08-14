@@ -18,11 +18,11 @@ describe('post utilities', () => {
   it('sorts by descending date without mutating the input', () => {
     const input = [{ date: new Date('2025-01-01') }, { date: new Date('2026-01-01') }];
 
-    expect(sortNewestFirst(input)[0].date.getFullYear()).toBe(2026);
-    expect(input[0].date.getFullYear()).toBe(2025);
+    expect(sortNewestFirst(input)[0].date.getUTCFullYear()).toBe(2026);
+    expect(input[0].date.getUTCFullYear()).toBe(2025);
   });
 
-  it('groups entries by year', () => {
+  it('groups entries by UTC publication year', () => {
     const groups = groupByYear([
       { date: new Date('2026-01-01') },
       { date: new Date('2025-01-01') },
