@@ -34,4 +34,8 @@ describe('post utilities', () => {
   it('removes Markdown syntax and normalizes to lowercase', () => {
     expect(normalizeSearchText('# Hello **世界** `Code`')).toBe('hello 世界 code');
   });
+
+  it('搜索文本不会保留围栏代码内容', () => {
+    expect(normalizeSearchText('正文\n```js\nconst secret = 1\n```\n结尾')).toBe('正文 结尾');
+  });
 });

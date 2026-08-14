@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="搜索" description="在浏览器中搜索本站已发布文章。">
+  <div class="reading search-page">
+    <header>
+      <h1>搜索</h1>
+      <p>索引只包含已发布文章，搜索在你的浏览器中完成。</p>
+    </header>
+
+    <div class="search-form">
+      <label for="site-search">关键词</label>
+      <input id="site-search" type="search" autocomplete="off" placeholder="搜索标题、标签或正文" />
+    </div>
+
+    <section id="search-results" class="search-results" aria-live="polite" aria-label="搜索结果">
+      <p>输入关键词开始搜索</p>
+    </section>
+  </div>
+
+  <script is:inline type="module">
+    const input = document.querySelector('#site-search');
+    const results = document.querySelector('#search-results');
+
+    if (!(input instanceof HTMLInputElement) || !(results instanceof HTMLElement)) {
+      throw new Error('Search controls are unavailable.');
+    }
+
+    const response = await fetch('/search-index.json');
+    const posts = response.ok ? await response.json() : [];
+
+    const replaceResults = (...nodes) => {
+      results.replaceChildren(...nodes);
+    };
+
+    const message = (text) => {
+      const paragraph = document.createElement('p');
+      paragraph.textContent = text;
+      replaceResults(paragraph);
+    };
+
+    const resultCard = (post) => {
+      const article = document.createElement('article');
+      article.className = 'search-result';
+
+      const heading = document.createElement('h2');
+      const link = document.createElement('a');
+      link.href = `/posts/${post.slug}/`;
+      link.textContent = post.title;
+      heading.append(link);
+
+      const meta = document.createElement('p');
+      meta.className = 'search-result__meta';
+      meta.textContent = [post.category, ...post.tags].join(' · ');
+
+      const description = document.createElement('p');
+      description.textContent = post.description;
+
+      article.append(heading, meta, description);
+      return article;
+    };
+
+    const search = () => {
+      const query = input.value.trim().toLocaleLowerCase('zh-CN');
+
+      if (!query) {
+        message('输入关键词开始搜索');
+        return;
+      }
+
+      const matches = posts.filter((post) =>
+        [post.title, post.description, post.category, ...post.tags, post.text]
+          .some((value) => value.toLocaleLowerCase('zh-CN').includes(query)),
+      );
+
+      if (matches.length === 0) {
+        message('没有找到相关文章');
+        return;
+      }
+
+      replaceResults(...matches.map(resultCard));
+    };
+
+    input.addEventListener('input', search);
+  </script>
+</BaseLayout>
+
+<style>
+  .search-page > header {
+    margin-bottom: 2rem;
+  }
+
+  .search-form label {
+    display: block;
+    margin-bottom: .45rem;
+    font-weight: 600;
+  }
+
+  .search-results {
+    margin-top: 2.5rem;
+  }
+
+  :global(.search-result) {
+    padding-block: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  :global(.search-result h2) {
+    margin: 0 0 .35rem;
+    font-size: 1.35rem;
+  }
+
+  :global(.search-result__meta) {
+    margin: 0;
+    color: var(--muted);
+    font: .8rem/1.5 system-ui, sans-serif;
+  }
+</style>
