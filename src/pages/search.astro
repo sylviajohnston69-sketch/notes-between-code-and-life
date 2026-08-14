@@ -15,7 +15,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
 
     <section id="search-results" class="search-results" aria-live="polite" aria-label="搜索结果">
-      <p>输入关键词开始搜索</p>
+      <p>正在加载搜索索引…</p>
     </section>
   </div>
 
@@ -27,8 +27,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       throw new Error('Search controls are unavailable.');
     }
 
-    const response = await fetch('/search-index.json');
-    const posts = response.ok ? await response.json() : [];
+    let posts = [];
+    let searchState = 'loading';
 
     const replaceResults = (...nodes) => {
       results.replaceChildren(...nodes);
@@ -62,6 +62,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     };
 
     const search = () => {
+      if (searchState === 'loading') {
+        message('正在加载搜索索引…');
+        return;
+      }
+
+      if (searchState === 'error') {
+        message('搜索暂时无法使用，请刷新页面后重试。');
+        return;
+      }
+
       const query = input.value.trim().toLocaleLowerCase('zh-CN');
 
       if (!query) {
@@ -83,6 +93,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     };
 
     input.addEventListener('input', search);
+
+    try {
+      const response = await fetch('/search-index.json');
+      if (!response.ok) throw new Error(`Search index request failed: ${response.status}`);
+
+      const index = await response.json();
+      if (!Array.isArray(index)) throw new Error('Search index is not an array.');
+
+      posts = index;
+      searchState = 'ready';
+    } catch {
+      searchState = 'error';
+    }
+
+    search();
   </script>
 </BaseLayout>
 
