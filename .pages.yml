@@ -9,7 +9,7 @@ content:
     path: src/content/blog
     format: yaml-frontmatter
     filename:
-      template: "{slug}.md"
+      template: "{fields.slug}.md"
       field: create
     view:
       fields: [title, date, category, draft]
