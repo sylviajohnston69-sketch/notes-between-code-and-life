@@ -62,15 +62,15 @@
 
 3. 在 <http://localhost:4321/> 检查网站整体样式。因为草稿不可公开访问，如需逐字预览，可暂时在本地把 `draft` 改为 `false`，检查完成后立即改回 `true`，并且不要在草稿公开状态下提交或推送。
 
-4. 完成下方“匿名发布检查表”。尤其要逐张打开文章图片，检查画面内容和元数据。
+4. 发布图片前，先在可信的图片编辑器中使用“导出”“存储为 Web 所用格式”或同类功能重新导出，明确选择“不保留元数据”“Metadata: None”或“清除位置和相机信息”。不要仅修改扩展名。导出后关闭编辑器，重新打开最终文件，逐张检查画面；还要在 Windows 文件资源管理器中右键图片，打开“属性 → 详细信息”，独立确认没有作者、设备、GPS、标题、备注等身份信息。
 
-5. 运行隐私检查：
+5. 运行有限的自动隐私防护：
 
    ```bash
    pnpm privacy:check
    ```
 
-   成功时会显示图片元数据检查通过，命令以退出码 0 结束；若报告文件名或敏感字段，先处理对应图片再继续。
+   当前脚本只会检查 JPEG 中是否存在 `Exif\0\0` 标记，并直接拒绝 TIF/TIFF 和 HEIC 文件。它**不会**检查 PNG/WebP 元数据，也不会检查 JPEG 的 XMP/IPTC 等其他元数据，更无法识别截图画面里的用户名、路径、通知或位置。成功时命令显示“图片隐私检查通过”并以退出码 0 结束，这只代表有限自动规则没有命中，不代表图片已经匿名。若脚本报告文件，先重新导出并清除元数据；即使脚本通过，也必须完成上一步的人工画面和文件属性检查。
 
 6. 确认文章可以公开后，把 frontmatter 改为：
 
@@ -94,15 +94,23 @@
 
    成功时只应列出你打算发布的 Markdown、图片或配置文件；`.astro/`、`dist/`、`node_modules/` 不应出现。
 
-9. 将文章加入提交（把示例文件名换成你的文件名）：
+9. 在确认上一步只列出本次发布内容后，同时暂存文章和文章引用的公开图片：
 
    ```bash
-   git add src/content/blog/my-new-post.md
+   git add src/content/blog public/images
    ```
 
-   成功时命令没有报错。
+   成功时命令没有报错。该命令会暂存这两个目录中的全部改动；如果目录中还有尚未准备发布的其他草稿或图片，不要使用目录命令，改为逐个写出本次文章和图片的完整路径，例如 `git add src/content/blog/my-new-post.md public/images/my-new-image.webp`。
 
-10. 创建提交：
+10. 列出已经暂存、将进入提交的文件：
+
+    ```bash
+    git diff --cached --name-only
+    ```
+
+    成功时必须同时看到本次文章（例如 `src/content/blog/my-new-post.md`）和它引用的每张新图片（例如 `public/images/my-new-image.webp`），且没有无关文件。缺少图片时回到上一步补充；出现无关文件时先不要提交，使用明确路径取消暂存，例如 `git restore --staged public/images/unrelated.webp`，然后再检查。
+
+11. 创建提交：
 
     ```bash
     git commit -m "post: publish my new post"
@@ -110,7 +118,7 @@
 
     成功时会显示新的提交编号和改动文件数量。
 
-11. 推送当前分支：
+12. 推送当前分支：
 
     ```bash
     git push
@@ -136,6 +144,7 @@ Pages CMS 的“保存”不是只保存在浏览器中：它会修改 GitHub �
 
 - [ ] 正文没有真实姓名、单位、住址或可识别的精确时间地点组合
 - [ ] 截图没有用户名、文件路径、通知、标签页账号或公司内部信息
+- [ ] 每张图片均已重新导出并清除元数据，且已独立人工检查画面和文件属性
 - [ ] `pnpm privacy:check` 已通过
 - [ ] Git 提交邮箱是 GitHub 提供的匿名 noreply 邮箱
 - [ ] 关于页没有私人邮箱、社交账号或简历式经历
@@ -173,6 +182,20 @@ $env:SITE_URL='https://example.com'; pnpm build
 ```
 
 成功时构建完成，生成文件中的 canonical 和 sitemap 使用 `https://example.com`。这个设置只影响当前 PowerShell 会话，不要把真实域名硬编码进 `astro.config.mjs`。
+
+验证完成后清除当前 PowerShell 会话里的临时变量：
+
+```powershell
+Remove-Item Env:SITE_URL
+```
+
+成功时命令没有输出。确认变量已清除：
+
+```powershell
+Test-Path Env:SITE_URL
+```
+
+成功时应显示 `False`。之后再次运行 `pnpm build` 时会恢复使用本地默认地址。
 
 ## 六、发布前完整本地验证
 
