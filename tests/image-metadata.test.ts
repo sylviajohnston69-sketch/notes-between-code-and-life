@@ -40,7 +40,7 @@ describe('image metadata guard', () => {
     const result = runPrivacyCheck({ 'nested/flagged.jpg': Buffer.from('Exif\0\0gps') });
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain('public\\images\\nested\\flagged.jpg');
+    expect(result.stderr).toContain(join('public', 'images', 'nested', 'flagged.jpg'));
   });
 
   it.each(['unsafe.tif', 'unsafe.tiff', 'unsafe.heic'])(
