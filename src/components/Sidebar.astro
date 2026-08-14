@@ -1,0 +1,53 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { CATEGORIES } from '../config/site';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { posts } = Astro.props;
+const categoryCounts = CATEGORIES.map((category) => ({
+  category,
+  count: posts.filter((post) => post.data.category === category).length,
+}));
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort((a, b) =>
+  a.localeCompare(b, 'zh-CN'),
+);
+---
+
+<aside class="sidebar" aria-label="文章索引">
+  <section aria-labelledby="sidebar-search">
+    <h2 id="sidebar-search">搜索</h2>
+    <form action="/search/" method="get" role="search">
+      <label for="sidebar-search-input">搜索文章</label>
+      <input id="sidebar-search-input" type="search" name="q" autocomplete="off" />
+    </form>
+  </section>
+
+  <section aria-labelledby="sidebar-categories">
+    <h2 id="sidebar-categories">栏目</h2>
+    <ul>
+      {
+        categoryCounts.map(({ category, count }) => (
+          <li>
+            <a href={`/categories/${encodeURIComponent(category)}/`}>{category}</a>{' '}
+            <span aria-label={`${count} 篇文章`}>（{count}）</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section aria-labelledby="sidebar-tags">
+    <h2 id="sidebar-tags">标签</h2>
+    <p>
+      {tags.map((tag) => <a class="tag" href={`/tags/${encodeURIComponent(tag)}/`}>{tag}</a>)}
+    </p>
+  </section>
+
+  <section aria-labelledby="sidebar-note">
+    <h2 id="sidebar-note">关于这里</h2>
+    <p>匿名写作，只保存公开文字，不收集读者身份。</p>
+  </section>
+</aside>

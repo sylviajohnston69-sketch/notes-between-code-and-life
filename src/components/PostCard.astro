@@ -1,0 +1,21 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { readingMinutes } from '../lib/post-utils';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const postUrl = `/posts/${post.data.slug}/`;
+---
+
+<article class="post-card">
+  <p class="post-card__meta">
+    <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString('zh-CN')}</time>
+    · <a href={`/categories/${encodeURIComponent(post.data.category)}/`}>{post.data.category}</a>
+    · {readingMinutes(post.body ?? '')} 分钟
+  </p>
+  <h2><a href={postUrl}>{post.data.title}</a></h2>
+  <p>{post.data.description}</p>
+</article>

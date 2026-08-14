@@ -1,0 +1,29 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import { readingMinutes } from '../lib/post-utils';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article class="reading prose">
+    <header>
+      <p class="post-card__meta">
+        <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString('zh-CN')}</time>
+        · <a href={`/categories/${encodeURIComponent(post.data.category)}/`}>{post.data.category}</a>
+        · {readingMinutes(post.body ?? '')} 分钟
+      </p>
+      <h1>{post.data.title}</h1>
+      <p>{post.data.description}</p>
+      <p>
+        {post.data.tags.map((tag) => <a class="tag" href={`/tags/${encodeURIComponent(tag)}/`}>{tag}</a>)}
+      </p>
+    </header>
+    <slot />
+  </article>
+</BaseLayout>
