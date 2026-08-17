@@ -122,8 +122,7 @@ git commit -m "fix: preserve sidebar search query"
 Push `HEAD:main`, deploy the linked production project, and open:
 
 ```text
-https://notes-between-code-and-life.vercel.app/search/?q=思考
+https://notes-between-code-and-life.vercel.app/search/?q=报错
 ```
 
-Expected: HTTP 200, the input value is `思考`, at least one matching result is visible, and the production title remains `在思考与生活之间`.
-
+Expected: HTTP 200, the input value is `报错`, at least one matching result is visible, and the production title remains `在思考与生活之间`.
